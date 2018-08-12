@@ -17,26 +17,26 @@ const UserSchema = mongoose.Schema({
   },
   firstName: { type: String, default: "" },
   lastName: { type: String, default: "" },
-  interactionVariables: [{ type: mongoose.Schema.Types.ObjectId, ref: "UserVariables" }],
 });
 
-const UserVariables = mongoose.Schema({
-  bases: [{ type: "String", required: true, default: "" }],
-  users: [{ type: String, default: "" }],
+const BaseSchema = mongoose.Schema({
+  creatorId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  title: { type: String, required: true },
 });
 
 UserSchema.methods.serialize = function() {
   return {
+    userId: this._id,
     username: this.username || "",
     firstName: this.firstName || "",
     lastName: this.lastName || "",
   };
 };
 
-UserVariables.methods.serialize = function() {
+BaseSchema.methods.serialize = function() {
   return {
-    bases: this.bases || "",
-    users: this.users || "",
+    creatorId: this.creatorId,
+    title: this.title,
   };
 };
 
@@ -48,7 +48,7 @@ UserSchema.statics.hashPassword = function(password) {
   return bcrypt.hash(password, 10);
 };
 
-const UserVariable = mongoose.model("UserVariable", UserVariables);
+const Base = mongoose.model("Base", BaseSchema);
 const User = mongoose.model("User", UserSchema);
 
-module.exports = { User, UserVariable };
+module.exports = { User, Base };

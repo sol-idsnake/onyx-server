@@ -72,10 +72,14 @@ router.post("/", jsonParser, (req, res) => {
     },
   };
   const tooSmallField = Object.keys(sizedFields).find(
-    field => "min" in sizedFields[field] && req.body[field].trim().length < sizedFields[field].min
+    field =>
+      "min" in sizedFields[field] &&
+      req.body[field].trim().length < sizedFields[field].min
   );
   const tooLargeField = Object.keys(sizedFields).find(
-    field => "max" in sizedFields[field] && req.body[field].trim().length > sizedFields[field].max
+    field =>
+      "max" in sizedFields[field] &&
+      req.body[field].trim().length > sizedFields[field].max
   );
 
   if (tooSmallField || tooLargeField) {
@@ -89,7 +93,13 @@ router.post("/", jsonParser, (req, res) => {
     });
   }
 
-  let { username, password, firstName = "", lastName = "", hasUserbases = 0 } = req.body;
+  let {
+    username,
+    password,
+    firstName = "",
+    lastName = "",
+    hasUserbases = 0,
+  } = req.body;
   // Username and password come in pre-trimmed, otherwise we throw an error
   // before this
   firstName = firstName.trim();
@@ -116,7 +126,6 @@ router.post("/", jsonParser, (req, res) => {
         password: hash,
         firstName,
         lastName,
-        hasUserbases,
       });
     })
     .then(user => {
