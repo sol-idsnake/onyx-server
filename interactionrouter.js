@@ -32,9 +32,9 @@ router.post("/add", (req, res) => {
 });
 
 router.delete('/delete', (req, res) => {
-	Base.findOneAndRemove({title: req.body.title})
+	Base.findByIdAndRemove(req.body.id)
 	.then(() => {
-      console.log(`Deleted post with title \`${req.body.title}\``);
+      console.log(`Deleted post with ID \`${req.body.id}\``);
       res.status(204).end();
     })
     .catch(err => res.status(500).json({ message: "Internal server error" }));

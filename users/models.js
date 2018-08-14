@@ -35,6 +35,7 @@ UserSchema.methods.serialize = function() {
 
 BaseSchema.methods.serialize = function() {
   return {
+    id: this._id,
     creatorId: this.creatorId,
     title: this.title,
   };
