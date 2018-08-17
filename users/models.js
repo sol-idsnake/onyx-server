@@ -9,19 +9,21 @@ const UserSchema = mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true,
+    unique: true
   },
   password: {
     type: String,
-    required: true,
+    required: true
   },
   firstName: { type: String, default: "" },
-  lastName: { type: String, default: "" },
+  lastName: { type: String, default: "" }
 });
 
 const BaseSchema = mongoose.Schema({
   creatorId: { type: mongoose.Schema.Types.ObjectId, required: true },
   title: { type: String, required: true },
+  currentUsers: { type: Number },
+  messages: { type: Number }
 });
 
 UserSchema.methods.serialize = function() {
@@ -29,7 +31,7 @@ UserSchema.methods.serialize = function() {
     userId: this._id,
     username: this.username || "",
     firstName: this.firstName || "",
-    lastName: this.lastName || "",
+    lastName: this.lastName || ""
   };
 };
 
@@ -38,6 +40,8 @@ BaseSchema.methods.serialize = function() {
     id: this._id,
     creatorId: this.creatorId,
     title: this.title,
+    currentUsers: this.currentUsers,
+    messages: this.messages
   };
 };
 
