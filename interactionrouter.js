@@ -7,22 +7,12 @@ mongoose.Promise = global.Promise;
 
 app.use(express.json());
 
-router.get("/list", (req, res) => {
-	Base.find()
-		.then(bases => {
-			res.json(bases.map(base => base.serialize()));
-		})
-		.catch(err => {
-			console.error(err);
-			res.status(500).json({ message: "Internal server error" });
-		});
-});
-
-router.get("/addUser/:id", (req, res) => {
-	console.log(req);
+router.get("/:id", (req, res) => {
 	Base.findById(req.params.id)
-		.then(messages => res.json(messages.serialize()))
-		.then(res => console.log(res))
+		// .then(base => {
+		// 	res.json(() => bases.serialize());
+		// })
+		.then(message => res.json(message.serialize()))
 		.catch(err => {
 			console.error(err);
 			res.status(500).json({ error: "Internal server error" });
@@ -30,18 +20,25 @@ router.get("/addUser/:id", (req, res) => {
 });
 
 // router.post("/add", jwtAuth, (req, res) => {
-router.post("/add", (req, res) => {
-	Base.create({
-		creatorId: req.body.userId,
-		title: req.body.title,
-		currentUsers: 0,
-		messages: 0
-	})
-		.then(post => res.status(201).json(post.serialize()))
-		.catch(err => {
-			console.error(err);
-			res.status(500).json({ message: "Internal server error" });
-		});
+router.post("/:id/user", (req, res) => {
+	const id = req.body.baseId;
+	const update = { $push: { userList: req.body.userName } };
+
+	Base.findByIdAndUpdate(id, update, { new: true })
+		// .then(res => res.status(204).end())
+		.then(base => res.json(base.serialize()))
+		.then(() => res.status(204).end())
+		.catch(err => res.status(500).json({ message: "Internal server error" }));
+});
+
+router.post("/:id/message", (req, res) => {
+	const id = req.body.baseId;
+	const update = { $push: { messages: req.body.message } };
+
+	Base.findByIdAndUpdate(id, update, { new: true })
+		.then(message => res.json(message.serialize()))
+		.then(() => res.status(204).end())
+		.catch(err => res.status(500).json({ message: "Internal server error" }));
 });
 
 router.delete("/delete", (req, res) => {

@@ -22,8 +22,8 @@ const UserSchema = mongoose.Schema({
 const BaseSchema = mongoose.Schema({
   creatorId: { type: mongoose.Schema.Types.ObjectId, required: true },
   title: { type: String, required: true },
-  currentUsers: { type: Number },
-  messages: { type: Number }
+  userList: [String],
+  messages: [String]
 });
 
 UserSchema.methods.serialize = function() {
@@ -40,7 +40,7 @@ BaseSchema.methods.serialize = function() {
     id: this._id,
     creatorId: this.creatorId,
     title: this.title,
-    currentUsers: this.currentUsers,
+    userList: this.userList,
     messages: this.messages
   };
 };

@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const morgan = require("morgan");
 const passport = require("passport");
 const bodyParser = require("body-parser");
+const baseRouter = require("./baseRouter");
 const interactionRouter = require("./interactionrouter");
 const { User } = require("./users/models");
 const { PORT, DATABASE_URL } = require("./config");
@@ -43,7 +44,9 @@ const jwtAuth = passport.authenticate("jwt", { session: false });
 //   });
 // });
 
-app.use("/base", interactionRouter);
+app.use("/baselist", baseRouter);
+app.use("/user-message", interactionRouter);
+// app.use("/lists", interactionRouter);
 
 app.use("*", (req, res) => {
   return res.status(404).json({ message: "Not Found" });
