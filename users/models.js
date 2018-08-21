@@ -16,15 +16,33 @@ const UserSchema = mongoose.Schema({
     required: true
   },
   firstName: { type: String, default: "" },
-  lastName: { type: String, default: "" }
+  lastName: { type: String, default: "" },
+  email: { type: String, default: "", required: true, unique: true }
 });
 
 const BaseSchema = mongoose.Schema({
   creatorId: { type: mongoose.Schema.Types.ObjectId, required: true },
   title: { type: String, required: true },
-  userList: [String],
-  messages: [String]
+  created: { type: Date, default: Date.now() }
 });
+
+const BaseUserSchema = mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId },
+  baseId: { type: mongoose.Schema.Types.ObjectId },
+  created: { type: Date, default: Date.now() },
+  acceptedMembership: { type: Boolean },
+  isCreator: { type: Boolean }
+});
+
+BaseUserSchema.methods.serialize = function() {
+  return {
+    userId: this.userId,
+    baseId: this.baseId,
+    created: this.created,
+    acceptedMembership: this.acceptedMembership,
+    isCreator: this.isCreator
+  };
+};
 
 UserSchema.methods.serialize = function() {
   return {
@@ -40,8 +58,7 @@ BaseSchema.methods.serialize = function() {
     id: this._id,
     creatorId: this.creatorId,
     title: this.title,
-    userList: this.userList,
-    messages: this.messages
+    created: this.created
   };
 };
 
@@ -55,5 +72,6 @@ UserSchema.statics.hashPassword = function(password) {
 
 const Base = mongoose.model("Base", BaseSchema);
 const User = mongoose.model("User", UserSchema);
+const BaseUser = mongoose.model("BaseUser", BaseUserSchema);
 
-module.exports = { User, Base };
+module.exports = { User, Base, BaseUser };

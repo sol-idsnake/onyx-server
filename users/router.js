@@ -12,7 +12,7 @@ const jsonParser = bodyParser.json();
 router.post("/", jsonParser, (req, res) => {
   console.log("server route ");
   //  First we ensure that the username and password are defined
-  const requiredFields = ["username", "password"];
+  const requiredFields = ["username", "password", "email"];
   const missingField = requiredFields.find(field => !(field in req.body));
 
   if (missingField) {
@@ -20,12 +20,18 @@ router.post("/", jsonParser, (req, res) => {
       code: 422,
       reason: "ValidationError",
       message: "Missing field",
-      location: missingField,
+      location: missingField
     });
   }
 
   // validating and cleaning up the values supplied for username, password, firstName and lastName
-  const stringFields = ["username", "password", "firstName", "lastName"];
+  const stringFields = [
+    "username",
+    "password",
+    "firstName",
+    "lastName",
+    "email"
+  ];
   const nonStringField = stringFields.find(
     field => field in req.body && typeof req.body[field] !== "string"
   );
@@ -35,7 +41,7 @@ router.post("/", jsonParser, (req, res) => {
       code: 422,
       reason: "ValidationError",
       message: "Incorrect field type: expected string",
-      location: nonStringField,
+      location: nonStringField
     });
   }
 
@@ -56,20 +62,20 @@ router.post("/", jsonParser, (req, res) => {
       code: 422,
       reason: "ValidationError",
       message: "Cannot start or end with whitespace",
-      location: nonTrimmedField,
+      location: nonTrimmedField
     });
   }
 
   const sizedFields = {
     username: {
-      min: 3,
+      min: 3
     },
     password: {
       min: 10,
       // bcrypt truncates after 72 characters, so let's not give the illusion
       // of security by storing extra (unused) info
-      max: 72,
-    },
+      max: 72
+    }
   };
   const tooSmallField = Object.keys(sizedFields).find(
     field =>
@@ -89,7 +95,7 @@ router.post("/", jsonParser, (req, res) => {
       message: tooSmallField
         ? `Must be at least ${sizedFields[tooSmallField].min} characters long`
         : `Must be at most ${sizedFields[tooLargeField].max} characters long`,
-      location: tooSmallField || tooLargeField,
+      location: tooSmallField || tooLargeField
     });
   }
 
@@ -98,7 +104,7 @@ router.post("/", jsonParser, (req, res) => {
     password,
     firstName = "",
     lastName = "",
-    hasUserbases = 0,
+    email = ""
   } = req.body;
   // Username and password come in pre-trimmed, otherwise we throw an error
   // before this
@@ -114,7 +120,7 @@ router.post("/", jsonParser, (req, res) => {
           code: 422,
           reason: "ValidationError",
           message: "Username already taken",
-          location: "username",
+          location: "username"
         });
       }
       // If there is no existing user, hash the password
@@ -126,6 +132,7 @@ router.post("/", jsonParser, (req, res) => {
         password: hash,
         firstName,
         lastName,
+        email
       });
     })
     .then(user => {
