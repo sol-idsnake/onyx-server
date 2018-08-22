@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const { User, Base } = require("./users/models");
+const { User, Base, BaseUser } = require("./users/models");
 const app = express();
 const router = express.Router();
 mongoose.Promise = global.Promise;
@@ -40,12 +40,20 @@ router.post("/add", (req, res) => {
 });
 
 router.delete("/delete", (req, res) => {
+	console.log(req.body);
 	Base.findByIdAndRemove(req.body.id)
 		.then(() => {
 			console.log(`Deleted post with ID \`${req.body.id}\``);
 			res.status(204).end();
 		})
 		.catch(err => res.status(500).json({ message: "Internal server error" }));
+
+	BaseUser.find({ baseId: req.body.id })
+		.remove()
+		.then(() => {
+			console.log(`All userlists with ID ${req.body.id} deleted`);
+			res.status(204).end();
+		});
 });
 
 module.exports = router;

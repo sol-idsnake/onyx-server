@@ -17,26 +17,13 @@ router.get("/list", (req, res) => {
 });
 
 router.post("/addUser", (req, res) => {
-	BaseUser.findOne({ baseId: req.body.baseId })
-		.then(function(res) {
-			if (res === null) {
-				return BaseUser.create({
-					userId: req.body.userName,
-					baseId: req.body.baseId,
-					created: Date.now(),
-					acceptedMembership: true,
-					isCreator: true
-				});
-			} else {
-				return BaseUser.create({
-					userId: req.body.userName,
-					baseId: req.body.baseId,
-					created: Date.now(),
-					acceptedMembership: false,
-					isCreator: false
-				});
-			}
-		})
+	BaseUser.create({
+		userId: req.body.userName,
+		baseId: req.body.baseId,
+		created: Date.now(),
+		acceptedMembership: req.body.acceptedMembership || false,
+		isCreator: req.body.isCreator || false
+	})
 		.then(user => res.json(user.serialize()))
 		.catch(err => {
 			console.error(err);
