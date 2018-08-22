@@ -6,7 +6,8 @@ const morgan = require("morgan");
 const passport = require("passport");
 const bodyParser = require("body-parser");
 const baseRouter = require("./baseRouter");
-const interactionRouter = require("./interactionrouter");
+// const interactionRouter = require("./interactionrouter");
+const baserUserRouter = require("./baseuserrouter");
 const { User } = require("./users/models");
 const { PORT, DATABASE_URL } = require("./config");
 
@@ -18,7 +19,7 @@ mongoose.Promise = global.Promise;
 const app = express();
 
 app.use(bodyParser.json());
-app.use(morgan("common"));
+app.use(morgan("dev"));
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
@@ -45,7 +46,7 @@ const jwtAuth = passport.authenticate("jwt", { session: false });
 // });
 
 app.use("/baselist", baseRouter);
-app.use("/user-message", interactionRouter);
+app.use("/user-message", baserUserRouter);
 // app.use("/lists", interactionRouter);
 
 app.use("*", (req, res) => {

@@ -27,7 +27,7 @@ const BaseSchema = mongoose.Schema({
 });
 
 const BaseUserSchema = mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId },
+  userId: { type: String },
   baseId: { type: mongoose.Schema.Types.ObjectId },
   created: { type: Date, default: Date.now() },
   acceptedMembership: { type: Boolean },
