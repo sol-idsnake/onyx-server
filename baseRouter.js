@@ -7,8 +7,8 @@ mongoose.Promise = global.Promise;
 
 app.use(express.json());
 
-router.get("/list", (req, res) => {
-	Base.find()
+router.get("/list/:id", (req, res) => {
+	Base.find({ creatorId: req.params.id })
 		.then(bases => res.json(bases.map(base => base.serialize())))
 		.catch(err => {
 			console.error(err);

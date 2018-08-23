@@ -31,4 +31,17 @@ router.post("/addUser", (req, res) => {
 		});
 });
 
+router.put("/modify", (req, res) => {
+	if (req.body.target === "acceptedMembership") {
+		return BaseUser.findOneAndUpdate(
+			{ userId: req.body.email },
+			{ acceptedMembership: req.body.bool },
+			{ new: true }
+		)
+			.then(baseUser => res.json(baseUser.serialize()))
+			.then(res => res.status(204).end())
+			.catch(err => res.status(500).json({ message: "Internal server error" }));
+	}
+});
+
 module.exports = router;
