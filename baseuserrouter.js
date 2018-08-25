@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const { BaseUser } = require("./users/models");
+const { BaseUser, Base } = require("./users/models");
 const app = express();
 const router = express.Router();
 mongoose.Promise = global.Promise;
@@ -8,21 +8,29 @@ mongoose.Promise = global.Promise;
 app.use(express.json());
 
 router.get("/list/:id", (req, res) => {
-	if (req.params.id === "generic") {
-		BaseUser.find()
-			.then(users => res.json(users.map(user => user.serialize())))
-			.catch(err => {
-				console.error(err);
-				res.status(500).json({ message: "Internal server error" });
-			});
-	} else {
-		BaseUser.find({ baseId: req.params.id })
-			.then(users => res.json(users.map(user => user.serialize())))
-			.catch(err => {
-				console.error(err);
-				res.status(500).json({ message: "Internal server error" });
-			});
-	}
+	BaseUser.find({ _id: req.params.id })
+		.then(users => res.json(users.map(user => user.serialize())))
+		.catch(err => {
+			console.error(err);
+			res.status(500).json({ message: "Internal server error" });
+		});
+});
+
+router.get("/byusername/:username", (req, res) => {
+	BaseUser.find({ userId: req.params.username })
+		.then(baseusers => {
+			let basefetches = [];
+
+			for (let baseuser of baseusers) {
+				basefetches.push(Base.findById(baseuser.baseId));
+			}
+			Promise.all(basefetches).then(([basefetches]) => res.json(basefetches));
+		})
+		// .then(users => res.json(users.map(user => user.serialize())))
+		.catch(err => {
+			console.error(err);
+			res.status(500).json({ message: "Internal server error" });
+		});
 });
 
 router.post("/addUser", (req, res) => {
