@@ -7,8 +7,8 @@ mongoose.Promise = global.Promise;
 
 app.use(express.json());
 
-router.get("/list/:id", (req, res) => {
-	Base.find({ creatorId: req.params.id })
+router.get("/list/", (req, res) => {
+	Base.find()
 		.then(bases => res.json(bases.map(base => base.serialize())))
 		.catch(err => {
 			console.error(err);
@@ -16,8 +16,19 @@ router.get("/list/:id", (req, res) => {
 		});
 });
 
+// router.get("/foreignBases/:id", (req, res) => {
+// 	console.log(req.params.id);
+// 	Base.find({ id: req.params.id })
+// 		.then(base => console.log(base))
+// 		.then(base => res.json(base.serialize()))
+// 		.catch(err => {
+// 			console.error(err);
+// 			res.status(500).json({ message: "Internal server error" });
+// 		});
+// });
+
 router.get("/single/:id", (req, res) => {
-	Base.findById(req.params.id)
+	Base.findById(req.params.id || req.body.id)
 		.then(base => res.json(base.serialize()))
 		.catch(err => {
 			console.error(err);

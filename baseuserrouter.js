@@ -7,13 +7,22 @@ mongoose.Promise = global.Promise;
 
 app.use(express.json());
 
-router.get("/list", (req, res) => {
-	BaseUser.find()
-		.then(users => res.json(users.map(user => user.serialize())))
-		.catch(err => {
-			console.error(err);
-			res.status(500).json({ message: "Internal server error" });
-		});
+router.get("/list/:id", (req, res) => {
+	if (req.params.id === "generic") {
+		BaseUser.find()
+			.then(users => res.json(users.map(user => user.serialize())))
+			.catch(err => {
+				console.error(err);
+				res.status(500).json({ message: "Internal server error" });
+			});
+	} else {
+		BaseUser.find({ baseId: req.params.id })
+			.then(users => res.json(users.map(user => user.serialize())))
+			.catch(err => {
+				console.error(err);
+				res.status(500).json({ message: "Internal server error" });
+			});
+	}
 });
 
 router.post("/addUser", (req, res) => {
