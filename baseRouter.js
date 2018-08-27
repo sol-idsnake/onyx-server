@@ -7,8 +7,9 @@ mongoose.Promise = global.Promise;
 
 app.use(express.json());
 
-router.get("/list/", (req, res) => {
-	Base.find()
+// Dashcontent fetches all bases created by the current User
+router.get("/list/:id", (req, res) => {
+	Base.find({ creatorId: req.params.id })
 		.then(bases => res.json(bases.map(base => base.serialize())))
 		.catch(err => {
 			console.error(err);
@@ -16,14 +17,14 @@ router.get("/list/", (req, res) => {
 		});
 });
 
-router.get("/single/:id", (req, res) => {
-	Base.findById(req.params.id || req.body.id)
-		.then(base => res.json(base.serialize()))
-		.catch(err => {
-			console.error(err);
-			res.status(500).json({ message: "Internal server error" });
-		});
-});
+// router.get("/single/:id", (req, res) => {
+// 	Base.findById(req.params.id || req.body.id)
+// 		.then(base => res.json(base.serialize()))
+// 		.catch(err => {
+// 			console.error(err);
+// 			res.status(500).json({ message: "Internal server error" });
+// 		});
+// });
 
 router.post("/add", (req, res) => {
 	Base.create({
@@ -40,7 +41,6 @@ router.post("/add", (req, res) => {
 });
 
 router.delete("/delete", (req, res) => {
-	console.log(req.body);
 	Base.findByIdAndRemove(req.body.id)
 		.then(() => {
 			console.log(`Deleted post with ID \`${req.body.id}\``);
