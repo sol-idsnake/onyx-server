@@ -1,9 +1,9 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const { User, Base, BaseUser } = require("./users/models");
+// const mongoose = require("mongoose");
+const { Base, BaseUser } = require("./users/models");
 const app = express();
 const router = express.Router();
-mongoose.Promise = global.Promise;
+// mongoose.Promise = global.Promise;
 
 app.use(express.json());
 
@@ -17,14 +17,25 @@ router.get("/list/:id", (req, res) => {
 		});
 });
 
-// router.get("/single/:id", (req, res) => {
-// 	Base.findById(req.params.id || req.body.id)
-// 		.then(base => res.json(base.serialize()))
-// 		.catch(err => {
-// 			console.error(err);
-// 			res.status(500).json({ message: "Internal server error" });
-// 		});
-// });
+/////////////////////////////////
+// Fetch single base, to include members and messages
+/////////////////////////////////
+router.get("/single-base/:id", (req, res) => {
+	Base.findOne({ _id: req.params.id })
+		.then(base => {
+			// let basefetches = [];
+
+			return BaseUser.find({ baseId: base.id }).then(users =>
+				res.json(users.map(user => user.serialize()))
+			);
+
+			// return Promise.all(basefetches).then(users => console.log(users));
+		})
+		.catch(err => {
+			console.error(err);
+			res.status(500).json({ message: "Internal server error" });
+		});
+});
 
 router.post("/add", (req, res) => {
 	Base.create({
