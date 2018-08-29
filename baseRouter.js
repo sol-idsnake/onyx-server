@@ -21,16 +21,26 @@ router.get("/list/:id", (req, res) => {
 // Fetch single base, to include members and messages
 /////////////////////////////////
 router.get("/single-base/:id", (req, res) => {
-	Base.findOne({ _id: req.params.id })
-		.then(base => {
-			// let basefetches = [];
+	BaseUser.find({ baseId: req.params.id })
+		.then(users => {
+			let baseUsers = [];
+			for (let user of users) {
+				baseUsers.push(Base.findById(req.params.id));
+			}
 
-			return BaseUser.find({ baseId: base.id }).then(users =>
-				res.json(users.map(user => user.serialize()))
-			);
-
-			// return Promise.all(basefetches).then(users => console.log(users));
+			return Promise.all(baseUsers).then(bases => {
+				const completeObjects = [];
+				for (let i = 0; i < users.length; i++) {
+					completeObject = {
+						base: bases[i].serialize(),
+						baseuser: users[i].serialize()
+					};
+					completeObjects.push(completeObject);
+				}
+				res.json(completeObjects);
+			});
 		})
+
 		.catch(err => {
 			console.error(err);
 			res.status(500).json({ message: "Internal server error" });
