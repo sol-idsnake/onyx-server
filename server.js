@@ -47,7 +47,6 @@ const jwtAuth = passport.authenticate("jwt", { session: false });
 
 app.use("/baselist", baseRouter);
 app.use("/user-message", baserUserRouter);
-// app.use("/lists", interactionRouter);
 
 app.use("*", (req, res) => {
   return res.status(404).json({ message: "Not Found" });
