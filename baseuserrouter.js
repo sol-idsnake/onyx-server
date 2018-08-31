@@ -47,21 +47,23 @@ router.post("/addUser", (req, res) => {
 		});
 });
 
-router.delete("/userDelete/:baseId", (req, res) => {
+router.delete("/userDelete/", (req, res) => {
+	console.log(req.body);
 	BaseUser.findOneAndDelete({
-		baseId: req.params.baseId,
-		userId: { $eq: req.body.userId }
+		baseId: req.body.baseId,
+		userId: { $eq: req.body.username }
 	})
 		.then(() => {
-			console.log(`Deleted user with ID \`${req.body.userId}\``);
+			console.log(`Deleted user with ID \`${req.body.username}\``);
 			res.status(204).end();
 		})
 		.catch(err => res.status(500).json({ message: "Internal server error" }));
 });
 
 router.put("/modify", (req, res) => {
+	console.log(req.body);
 	BaseUser.findOneAndUpdate(
-		{ baseId: req.body.baseId },
+		{ baseId: req.body.baseId, userId: { $eq: req.body.username } },
 		{ acceptedMembership: req.body.bool },
 		{ new: true }
 	)
