@@ -71,6 +71,7 @@ BaseSchema.methods.serialize = function() {
 
 MessageSchema.methods.serialize = function() {
   return {
+    id: this._id,
     baseId: this.baseId,
     content: this.content,
     created: this.created

@@ -61,7 +61,6 @@ router.delete("/userDelete/", (req, res) => {
 });
 
 router.put("/modify", (req, res) => {
-	console.log(req.body);
 	BaseUser.findOneAndUpdate(
 		{ baseId: req.body.baseId, userId: { $eq: req.body.username } },
 		{ acceptedMembership: req.body.bool },

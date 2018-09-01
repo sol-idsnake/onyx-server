@@ -40,7 +40,7 @@ router.get("/single-base/:id", (req, res) => {
 				})
 				.then(data => {
 					Message.find({ baseId: req.params.id }).then(data => {
-						completeObject.messages = data;
+						completeObject.messages = data.map(item => item.serialize());
 						return res.json(completeObject);
 					});
 				});
@@ -88,11 +88,16 @@ router.delete("/delete", (req, res) => {
 					console.log(`All users from list with ID ${req.body.id} deleted`);
 					res.status(204).end();
 				})
+				.then(() => {
+					Message.deleteMany({ baseId: req.body.id }).then(() => {
+						console.log(`All users from list with ID ${req.body.id} deleted`);
+						res.status(204).end();
+					});
+				})
 				.catch(err =>
 					res.status(500).json({ message: "Internal server error" })
 				);
-		})
-		.catch(err => res.status(500).json({ message: "Internal server error" }));
+		});
 });
 
 module.exports = router;
