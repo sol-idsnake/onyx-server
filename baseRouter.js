@@ -3,16 +3,54 @@ const express = require("express");
 const { Base, BaseUser, Message } = require("./users/models");
 const app = express();
 const router = express.Router();
+const passport = require("passport");
 // mongoose.Promise = global.Promise;
 
 app.use(express.json());
-
+const jwtAuth = passport.authenticate("jwt", { session: false });
 // Dashcontent fetches all bases created by the current User
 
 // Todo: also fetch 'count' information via mongoose about userlist- & message length
 // 				return it via one object. see --> baseuserrouter, completeObject concept
-router.get("/list/:id", (req, res) => {
+router.get("/list/:id", jwtAuth, (req, res) => {
+	// async function fetcher() {
+	// 	try {
+	// 		const bases = await Base.find({ creatorId: req.params.id });
+	// 		const baseUserPromises = bases.map(base =>
+	// 			BaseUser.find({ baseId: base._id })
+	// 		);
+	// 		return await Promise.all(baseUserPromises);
+	// 	} catch (err) {
+	// 		console.error(err);
+	// 		res.status(500).json({ message: "Internal server error" });
+	// 	}
+	// 	// finally {
+	// 	// 	console.log("trigger");
+	// 	// }
+	// }
+	// fetcher().then(data => console.log(data));
+
 	Base.find({ creatorId: req.params.id })
+		// .then(bases => {
+		// 	for (let base of bases) {
+		// 		let completeObject = {
+		// 			base: {},
+		// 			users: BaseUser.find({ creatorId: base._id }.countDocuments()),
+		// 			messages: ""
+		// 		};
+		// 		completeObject.base = base.serialize();
+		// 	}
+		// })
+		// completeObjectArray = []
+		// .then(bases => {
+		// 	bases.forEach(base => {
+		// 		completeObject = {
+		// 			base: base,
+		// 			users:
+		// 		}
+		// 	})
+		// })
+
 		.then(bases => res.json(bases.map(base => base.serialize())))
 		.catch(err => {
 			console.error(err);
@@ -23,14 +61,13 @@ router.get("/list/:id", (req, res) => {
 /////////////////////////////////
 // Fetch single base, to include members and messages
 /////////////////////////////////
-router.get("/single-base/:id", (req, res) => {
+router.get("/single-base/:id", jwtAuth, (req, res) => {
 	let completeObject = {
 		base: {},
 		users: [],
 		messages: []
 	};
 
-	// Todo: also serialize other queries
 	Base.findById(req.params.id)
 		.then(data => {
 			completeObject.base = data;
@@ -39,7 +76,7 @@ router.get("/single-base/:id", (req, res) => {
 		.then(data => {
 			BaseUser.find({ baseId: req.params.id })
 				.then(data => {
-					completeObject.users = data;
+					completeObject.users = data.map(item => item.serialize());
 					return data;
 				})
 				.then(data => {
@@ -55,7 +92,7 @@ router.get("/single-base/:id", (req, res) => {
 		});
 });
 
-router.post("/add", (req, res) => {
+router.post("/add", jwtAuth, (req, res) => {
 	Base.create({
 		creatorId: req.body.userId,
 		title: req.body.title
@@ -80,7 +117,7 @@ router.post("/add", (req, res) => {
 		);
 });
 
-router.delete("/delete", (req, res) => {
+router.delete("/delete", jwtAuth, (req, res) => {
 	Base.findByIdAndDelete(req.body.id)
 		.then(() => {
 			console.log(`Deleted base with ID \`${req.body.id}\``);

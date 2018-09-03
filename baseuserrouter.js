@@ -3,11 +3,13 @@ const mongoose = require("mongoose");
 const { BaseUser, Base, Message } = require("./users/models");
 const app = express();
 const router = express.Router();
+const passport = require("passport");
+const jwtAuth = passport.authenticate("jwt", { session: false });
 mongoose.Promise = global.Promise;
 
 app.use(express.json());
 
-router.get("/foreignbases/:username", (req, res) => {
+router.get("/foreignbases/:username", jwtAuth, (req, res) => {
 	const userId = req.params.username.toLowerCase();
 	BaseUser.find({ userId })
 		.then(baseusers => {
@@ -34,7 +36,7 @@ router.get("/foreignbases/:username", (req, res) => {
 		});
 });
 
-router.post("/addUser", (req, res) => {
+router.post("/addUser", jwtAuth, (req, res) => {
 	BaseUser.create({
 		userId: req.body.userName.toLowerCase(),
 		baseId: req.body.baseId,
@@ -47,20 +49,33 @@ router.post("/addUser", (req, res) => {
 		});
 });
 
-router.delete("/userDelete/", (req, res) => {
-	console.log(req.body);
+router.delete("/userDelete/", jwtAuth, (req, res) => {
+	let completeObject = {
+		base: {},
+		baseuser: {}
+	};
+
 	BaseUser.findOneAndDelete({
 		baseId: req.body.baseId,
 		userId: { $eq: req.body.username }
 	})
-		.then(() => {
-			console.log(`Deleted user with ID \`${req.body.username}\``);
-			res.status(204).end();
+		.then(data => {
+			completeObject.baseuser = data;
+			return data;
+		})
+		.then(data => {
+			Base.findById(data.baseId).then(item => {
+				completeObject.base = item;
+				return res
+					.json(completeObject)
+					.status(204)
+					.end();
+			});
 		})
 		.catch(err => res.status(500).json({ message: "Internal server error" }));
 });
 
-router.put("/modify", (req, res) => {
+router.put("/modify", jwtAuth, (req, res) => {
 	BaseUser.findOneAndUpdate(
 		{ baseId: req.body.baseId, userId: { $eq: req.body.username } },
 		{ acceptedMembership: req.body.bool },
@@ -72,7 +87,7 @@ router.put("/modify", (req, res) => {
 });
 
 // 4 CRUD Ops to add messages
-router.post("/messageAdd", (req, res) => {
+router.post("/messageAdd", jwtAuth, (req, res) => {
 	Message.create({
 		baseId: req.body.baseId,
 		content: req.body.content,
@@ -85,7 +100,7 @@ router.post("/messageAdd", (req, res) => {
 		});
 });
 
-router.delete("/deleteMsg/:id", (req, res) => {
+router.delete("/deleteMsg/:id", jwtAuth, (req, res) => {
 	Message.findByIdAndRemove(req.params.id)
 		.then(() => {
 			console.log(`Deleted message with ID \`${req.params.id}\``);
