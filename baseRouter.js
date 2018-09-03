@@ -8,6 +8,9 @@ const router = express.Router();
 app.use(express.json());
 
 // Dashcontent fetches all bases created by the current User
+
+// Todo: also fetch 'count' information via mongoose about userlist- & message length
+// 				return it via one object. see --> baseuserrouter, completeObject concept
 router.get("/list/:id", (req, res) => {
 	Base.find({ creatorId: req.params.id })
 		.then(bases => res.json(bases.map(base => base.serialize())))
@@ -27,6 +30,7 @@ router.get("/single-base/:id", (req, res) => {
 		messages: []
 	};
 
+	// Todo: also serialize other queries
 	Base.findById(req.params.id)
 		.then(data => {
 			completeObject.base = data;
