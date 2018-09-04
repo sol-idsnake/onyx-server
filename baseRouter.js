@@ -13,49 +13,55 @@ const jwtAuth = passport.authenticate("jwt", { session: false });
 // Todo: also fetch 'count' information via mongoose about userlist- & message length
 // 				return it via one object. see --> baseuserrouter, completeObject concept
 router.get("/list/:id", jwtAuth, (req, res) => {
-	// async function fetcher() {
-	// 	try {
-	// 		const bases = await Base.find({ creatorId: req.params.id });
-	// 		const baseUserPromises = bases.map(base =>
-	// 			BaseUser.find({ baseId: base._id })
-	// 		);
-	// 		return await Promise.all(baseUserPromises);
-	// 	} catch (err) {
-	// 		console.error(err);
-	// 		res.status(500).json({ message: "Internal server error" });
-	// 	}
-	// 	// finally {
-	// 	// 	console.log("trigger");
-	// 	// }
-	// }
-	// fetcher().then(data => console.log(data));
+	function getBasePromise(base) {
+		return new Promise(async (resolve, reject) => {
+			const users = await BaseUser.countDocuments({ baseId: base._id });
+			const messages = await Message.countDocuments({ baseId: base._id });
+			resolve({
+				base,
+				users,
+				messages
+			});
+		});
+	}
 
-	Base.find({ creatorId: req.params.id })
-		// .then(bases => {
-		// 	for (let base of bases) {
-		// 		let completeObject = {
-		// 			base: {},
-		// 			users: BaseUser.find({ creatorId: base._id }.countDocuments()),
-		// 			messages: ""
-		// 		};
-		// 		completeObject.base = base.serialize();
-		// 	}
-		// })
-		// completeObjectArray = []
-		// .then(bases => {
-		// 	bases.forEach(base => {
-		// 		completeObject = {
-		// 			base: base,
-		// 			users:
-		// 		}
-		// 	})
-		// })
-
-		.then(bases => res.json(bases.map(base => base.serialize())))
-		.catch(err => {
+	async function fetcher() {
+		try {
+			const bases = await Base.find({ creatorId: req.params.id });
+			const baseUserPromises = bases.map(base => getBasePromise(base));
+			return await Promise.all(baseUserPromises);
+		} catch (err) {
 			console.error(err);
 			res.status(500).json({ message: "Internal server error" });
-		});
+		}
+	}
+	fetcher().then(data => res.json(data));
+	// Base.find({ creatorId: req.params.id })
+	// .then(bases => {
+	// 	for (let base of bases) {
+	// 		let completeObject = {
+	// 			base: {},
+	// 			users: BaseUser.find({ creatorId: base._id }.countDocuments()),
+	// 			messages: ""
+	// 		};
+	// 		completeObject.base = base.serialize();
+	// 	}
+	// })
+	// completeObjectArray = []
+	// .then(bases => {
+	// 	bases.forEach(base => {
+	// 		completeObject = {
+	// 			base: base,
+	// 			users:
+	// 		}
+	// 	})
+	// })
+
+	// .then(bases => res.json(bases.map(base => base.serialize())))
+	// .catch(err => {
+	// console.error(err);
+	// res.status(500).json({ message: "Internal server error" });
+	// });
 });
 
 /////////////////////////////////
