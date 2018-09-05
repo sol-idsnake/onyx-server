@@ -42,7 +42,13 @@ router.post("/addUser", jwtAuth, (req, res) => {
 		baseId: req.body.baseId,
 		created: Date.now()
 	})
-		.then(user => res.json(user.serialize()))
+		.then(user => {
+			Base.findById(req.body.baseId).then(base => {
+				base.users.push(user);
+				return base.save();
+			});
+			res.json(user.serialize());
+		})
 		.catch(err => {
 			console.error(err);
 			res.status(500).json({ message: "Internal server error" });
@@ -93,7 +99,13 @@ router.post("/messageAdd", jwtAuth, (req, res) => {
 		content: req.body.content,
 		created: Date.now()
 	})
-		.then(message => res.json(message.serialize()))
+		.then(message => {
+			Base.findById(req.body.baseId).then(base => {
+				base.messages.push(message);
+				return base.save();
+			});
+			res.json(message.serialize());
+		})
 		.catch(err => {
 			console.error(err);
 			res.status(500).json({ message: "Internal server error" });

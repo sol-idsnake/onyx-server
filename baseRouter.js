@@ -1,67 +1,29 @@
 const express = require("express");
-// const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 const { Base, BaseUser, Message } = require("./users/models");
 const app = express();
 const router = express.Router();
 const passport = require("passport");
-// mongoose.Promise = global.Promise;
+mongoose.Promise = global.Promise;
 
 app.use(express.json());
 const jwtAuth = passport.authenticate("jwt", { session: false });
+
+/////////////////////////////////
 // Dashcontent fetches all bases created by the current User
-
-// Todo: also fetch 'count' information via mongoose about userlist- & message length
-// 				return it via one object. see --> baseuserrouter, completeObject concept
+/////////////////////////////////
 router.get("/list/:id", jwtAuth, (req, res) => {
-	function getBasePromise(base) {
-		return new Promise(async (resolve, reject) => {
-			const users = await BaseUser.countDocuments({ baseId: base._id });
-			const messages = await Message.countDocuments({ baseId: base._id });
-			resolve({
-				base,
-				users,
-				messages
-			});
-		});
-	}
-
-	async function fetcher() {
-		try {
-			const bases = await Base.find({ creatorId: req.params.id });
-			const baseUserPromises = bases.map(base => getBasePromise(base));
-			return await Promise.all(baseUserPromises);
-		} catch (err) {
+	Base.find({ creatorId: req.params.id })
+		.sort("created")
+		.populate("users")
+		.populate("messages")
+		.then(bases => {
+			res.json(bases.map(base => base.serialize()));
+		})
+		.catch(err => {
 			console.error(err);
-			res.status(500).json({ message: "Internal server error" });
-		}
-	}
-	fetcher().then(data => res.json(data));
-	// Base.find({ creatorId: req.params.id })
-	// .then(bases => {
-	// 	for (let base of bases) {
-	// 		let completeObject = {
-	// 			base: {},
-	// 			users: BaseUser.find({ creatorId: base._id }.countDocuments()),
-	// 			messages: ""
-	// 		};
-	// 		completeObject.base = base.serialize();
-	// 	}
-	// })
-	// completeObjectArray = []
-	// .then(bases => {
-	// 	bases.forEach(base => {
-	// 		completeObject = {
-	// 			base: base,
-	// 			users:
-	// 		}
-	// 	})
-	// })
-
-	// .then(bases => res.json(bases.map(base => base.serialize())))
-	// .catch(err => {
-	// console.error(err);
-	// res.status(500).json({ message: "Internal server error" });
-	// });
+			res.status(500).json({ message: "Bases cannot be fetched" });
+		});
 });
 
 /////////////////////////////////
@@ -102,25 +64,20 @@ router.post("/add", jwtAuth, (req, res) => {
 	Base.create({
 		creatorId: req.body.userId,
 		title: req.body.title
-	})
-		.then(post => res.status(201).json(post.serialize()))
-		.catch(err => {
-			console.error(err);
-			res.status(500).json({ message: "Internal server error" });
+	}).then(baseInfo => {
+		BaseUser.create({
+			userId: req.body.username,
+			baseId: baseInfo._id,
+			created: Date.now(),
+			acceptedMembership: true,
+			isCreator: true
 		})
-		.then(() =>
-			Base.find({ title: req.body.title }).then(data => {
-				return data.map(item => {
-					BaseUser.create({
-						userId: req.body.username,
-						baseId: item._id,
-						created: Date.now(),
-						acceptedMembership: true,
-						isCreator: true
-					});
-				});
+			.then(baseuser => {
+				baseInfo.users.push(baseuser);
+				return baseInfo.save();
 			})
-		);
+			.then(base => res.json(base.serialize()));
+	});
 });
 
 router.delete("/delete", jwtAuth, (req, res) => {

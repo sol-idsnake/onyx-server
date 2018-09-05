@@ -23,30 +23,53 @@ const UserSchema = mongoose.Schema({
 const BaseSchema = mongoose.Schema({
   creatorId: { type: mongoose.Schema.Types.ObjectId, required: true },
   title: { type: String, required: true },
-  created: { type: Date, default: Date.now() }
+  created: { type: Date, default: Date.now() },
+  users: [{ type: mongoose.Schema.Types.ObjectId, ref: "BaseUser" }],
+  messages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }]
 });
 
 const BaseUserSchema = mongoose.Schema({
   userId: { type: String },
-  baseId: { type: mongoose.Schema.Types.ObjectId },
+  baseId: { type: mongoose.Schema.Types.ObjectId, ref: "Base" },
   created: { type: Date, default: Date.now() },
   acceptedMembership: { type: Boolean, default: false },
   isCreator: { type: Boolean, default: false }
 });
 
 const MessageSchema = mongoose.Schema({
-  baseId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  baseId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "Base" },
   content: { type: String, required: true },
   created: { type: Date, default: Date.now(), required: true }
 });
 
+BaseSchema.methods.serialize = function() {
+  return {
+    id: this._id,
+    creatorId: this.creatorId,
+    title: this.title,
+    created: this.created,
+    users: this.users,
+    messages: this.messages
+  };
+};
+
 BaseUserSchema.methods.serialize = function() {
   return {
-    userId: this.userId,
+    acceptedMembership: this.acceptedMembership,
     baseId: this.baseId,
     created: this.created,
-    acceptedMembership: this.acceptedMembership,
-    isCreator: this.isCreator
+    id: this._id,
+    isCreator: this.isCreator,
+    userId: this.userId
+  };
+};
+
+MessageSchema.methods.serialize = function() {
+  return {
+    baseId: this.baseId,
+    content: this.content,
+    created: this.created,
+    id: this._id
   };
 };
 
@@ -57,24 +80,6 @@ UserSchema.methods.serialize = function() {
     firstName: this.firstName || "",
     lastName: this.lastName || "",
     email: this.email || ""
-  };
-};
-
-BaseSchema.methods.serialize = function() {
-  return {
-    id: this._id,
-    creatorId: this.creatorId,
-    title: this.title,
-    created: this.created
-  };
-};
-
-MessageSchema.methods.serialize = function() {
-  return {
-    id: this._id,
-    baseId: this.baseId,
-    content: this.content,
-    created: this.created
   };
 };
 
