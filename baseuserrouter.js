@@ -66,12 +66,18 @@ router.delete("/userDelete/", jwtAuth, (req, res) => {
 		userId: { $eq: req.body.username }
 	})
 		.then(data => {
+			console.log(data);
 			completeObject.baseuser = data;
 			return data;
 		})
 		.then(data => {
-			Base.findById(data.baseId).then(item => {
-				completeObject.base = item;
+			Base.findById(data.baseId).then(base => {
+				base.users.filter(user => user !== data._id);
+				base.save();
+
+				console.log(base);
+				completeObject.base = base;
+				console.log(completeObject);
 				return res
 					.json(completeObject)
 					.status(204)
@@ -113,10 +119,20 @@ router.post("/messageAdd", jwtAuth, (req, res) => {
 });
 
 router.delete("/deleteMsg/:id", jwtAuth, (req, res) => {
+	console.log(req.params.id);
 	Message.findByIdAndRemove(req.params.id)
+		.then(data => {
+			console.log(data);
+			Base.findById(data.baseId).then(base => {
+				base.messages.filter(message => message !== data._id);
+			});
+		})
 		.then(() => {
 			console.log(`Deleted message with ID \`${req.params.id}\``);
-			res.status(204).end();
+			return res
+				.json(req.params.id)
+				.status(204)
+				.end();
 		})
 		.catch(err => res.status(500).json({ message: "Internal server error" }));
 });
