@@ -60,30 +60,33 @@ router.delete("/userDelete/", jwtAuth, (req, res) => {
 		base: {},
 		baseuser: {}
 	};
+	// console.log(req.body);
 
 	BaseUser.findOneAndDelete({
 		baseId: req.body.baseId,
 		userId: { $eq: req.body.username }
 	})
-		.then(data => {
-			console.log(data);
-			completeObject.baseuser = data;
-			return data;
+		.then(user => {
+			console.log(`Deleted base with ID \`${req.body.id}\``);
+			res.status(204);
+			return user;
 		})
-		.then(data => {
-			Base.findById(data.baseId).then(base => {
-				base.users.filter(user => user !== data._id);
-				base.save();
-
-				console.log(base);
-				completeObject.base = base;
-				console.log(completeObject);
-				return res
-					.json(completeObject)
-					.status(204)
-					.end();
-			});
+		.then(user => {
+			Base.findById(user.baseId)
+				.then(base => {
+					console.log(base);
+					console.log(user._id);
+					base.users.update({}, { $pull: { $eq: user._id } });
+					return base.save();
+				})
+				.then(result => console.log(result));
 		})
+		// return res
+		// .json(completeObject)
+		// .status(204)
+		// .end();
+		// });
+		// })
 		.catch(err => res.status(500).json({ message: "Internal server error" }));
 });
 
