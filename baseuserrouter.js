@@ -44,6 +44,7 @@ router.post("/addUser", jwtAuth, (req, res) => {
 	})
 		.then(user => {
 			Base.findById(req.body.baseId).then(base => {
+				console.log(base);
 				base.users.push(user);
 				return base.save();
 			});
@@ -60,34 +61,25 @@ router.delete("/userDelete/", jwtAuth, (req, res) => {
 		base: {},
 		baseuser: {}
 	};
-	// console.log(req.body);
 
 	BaseUser.findOneAndDelete({
 		baseId: req.body.baseId,
 		userId: { $eq: req.body.username }
-	})
-		.then(user => {
-			console.log(`Deleted base with ID \`${req.body.id}\``);
-			res.status(204);
-			return user;
-		})
-		.then(user => {
-			Base.findById(user.baseId)
-				.then(base => {
-					console.log(base);
-					console.log(user._id);
-					base.users.update({}, { $pull: { $eq: user._id } });
-					return base.save();
-				})
-				.then(result => console.log(result));
-		})
-		// return res
-		// .json(completeObject)
-		// .status(204)
-		// .end();
-		// });
-		// })
-		.catch(err => res.status(500).json({ message: "Internal server error" }));
+	}).then(user => {
+		completeObject.baseuser = user;
+		Base.findById(user.baseId)
+			.then(base => {
+				let indexOf = base.users.indexOf(user._id);
+				base.users.splice(indexOf, 1);
+				base.save();
+				completeObject.base = base;
+				return res
+					.json(completeObject)
+					.status(204)
+					.end();
+			})
+			.catch(err => res.status(500).json({ message: "Internal server error" }));
+	});
 });
 
 router.put("/modify", jwtAuth, (req, res) => {
@@ -122,12 +114,16 @@ router.post("/messageAdd", jwtAuth, (req, res) => {
 });
 
 router.delete("/deleteMsg/:id", jwtAuth, (req, res) => {
-	console.log(req.params.id);
 	Message.findByIdAndRemove(req.params.id)
-		.then(data => {
-			console.log(data);
-			Base.findById(data.baseId).then(base => {
-				base.messages.filter(message => message !== data._id);
+		.then(message => {
+			Base.findById(message.baseId).then(base => {
+				let indexOf = base.messages.indexOf(message._id);
+				base.messages.splice(indexOf, 1);
+				base.save();
+				return res
+					.json(base)
+					.status(204)
+					.end();
 			});
 		})
 		.then(() => {
