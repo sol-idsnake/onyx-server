@@ -44,7 +44,6 @@ router.post("/addUser", jwtAuth, (req, res) => {
 	})
 		.then(user => {
 			Base.findById(req.body.baseId).then(base => {
-				console.log(base);
 				base.users.push(user);
 				return base.save();
 			});
