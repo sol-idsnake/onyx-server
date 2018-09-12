@@ -37,27 +37,22 @@ router.get("/foreignbases/:username", jwtAuth, (req, res) => {
 });
 
 router.post("/addUser", jwtAuth, (req, res) => {
-	console.log(req.body);
-	if (req.body.userName === "") {
-		return res.json({ error: "Cannot add empty" });
-	} else {
-		BaseUser.create({
-			userId: req.body.userName.toLowerCase(),
-			baseId: req.body.baseId,
-			created: Date.now()
-		})
-			.then(user => {
-				Base.findById(req.body.baseId).then(base => {
-					base.users.push(user);
-					return base.save();
-				});
-				res.json(user.serialize());
-			})
-			.catch(err => {
-				console.error(err);
-				res.status(500).json({ message: "Internal server error" });
+	BaseUser.create({
+		userId: req.body.userName.toLowerCase(),
+		baseId: req.body.baseId,
+		created: Date.now()
+	})
+		.then(user => {
+			Base.findById(req.body.baseId).then(base => {
+				base.users.push(user);
+				return base.save();
 			});
-	}
+			res.json(user.serialize());
+		})
+		.catch(err => {
+			console.error(err);
+			res.status(500).json({ message: "Internal server error" });
+		});
 });
 
 router.delete("/userDelete/", jwtAuth, (req, res) => {
