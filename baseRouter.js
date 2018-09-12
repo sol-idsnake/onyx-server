@@ -66,7 +66,7 @@ router.post("/add", jwtAuth, (req, res) => {
 		title: req.body.title
 	}).then(baseInfo => {
 		BaseUser.create({
-			userId: req.body.username,
+			userId: req.body.username.toLowerCase(),
 			baseId: baseInfo._id,
 			created: Date.now(),
 			acceptedMembership: true,
