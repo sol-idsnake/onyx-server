@@ -9,6 +9,9 @@ mongoose.Promise = global.Promise;
 
 app.use(express.json());
 
+/////////////////////////////////
+// Fetches all bases a user has been added to
+/////////////////////////////////
 router.get("/foreignbases/:username", jwtAuth, (req, res) => {
 	const userId = req.params.username.toLowerCase();
 	BaseUser.find({ userId })
@@ -36,6 +39,9 @@ router.get("/foreignbases/:username", jwtAuth, (req, res) => {
 		});
 });
 
+/////////////////////////////////
+// Adds a new user to the list via userlist.js
+/////////////////////////////////
 router.post("/addUser", jwtAuth, (req, res) => {
 	BaseUser.create({
 		userId: req.body.userName.toLowerCase(),
@@ -55,6 +61,9 @@ router.post("/addUser", jwtAuth, (req, res) => {
 		});
 });
 
+/////////////////////////////////
+// Deletes a user from userlist.js
+/////////////////////////////////
 router.delete("/userDelete/", jwtAuth, (req, res) => {
 	let completeObject = {
 		base: {},
@@ -81,6 +90,9 @@ router.delete("/userDelete/", jwtAuth, (req, res) => {
 	});
 });
 
+/////////////////////////////////
+// Gets called when a user accepts the invitation to a base
+/////////////////////////////////
 router.put("/modify", jwtAuth, (req, res) => {
 	BaseUser.findOneAndUpdate(
 		{ baseId: req.body.baseId, userId: { $eq: req.body.username } },
@@ -92,7 +104,9 @@ router.put("/modify", jwtAuth, (req, res) => {
 		.catch(err => res.status(500).json({ message: "Internal server error" }));
 });
 
-// 4 CRUD Ops to add messages
+/////////////////////////////////
+// Add a message to messagelist.js
+/////////////////////////////////
 router.post("/messageAdd", jwtAuth, (req, res) => {
 	Message.create({
 		baseId: req.body.baseId,
@@ -112,6 +126,9 @@ router.post("/messageAdd", jwtAuth, (req, res) => {
 		});
 });
 
+/////////////////////////////////
+// Delete a message from messagelist.js
+/////////////////////////////////
 router.delete("/deleteMsg/:id", jwtAuth, (req, res) => {
 	Message.findByIdAndRemove(req.params.id)
 		.then(message => {

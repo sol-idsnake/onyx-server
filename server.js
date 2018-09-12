@@ -6,7 +6,6 @@ const morgan = require("morgan");
 const passport = require("passport");
 const bodyParser = require("body-parser");
 const baseRouter = require("./baseRouter");
-// const interactionRouter = require("./interactionrouter");
 const baserUserRouter = require("./baseuserrouter");
 const { User } = require("./users");
 const { PORT, DATABASE_URL } = require("./config");
