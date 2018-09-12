@@ -8,7 +8,7 @@ const bodyParser = require("body-parser");
 const baseRouter = require("./baseRouter");
 // const interactionRouter = require("./interactionrouter");
 const baserUserRouter = require("./baseuserrouter");
-const { User } = require("./users/models");
+const { User } = require("./users");
 const { PORT, DATABASE_URL } = require("./config");
 
 const { router: usersRouter } = require("./users");
@@ -39,7 +39,7 @@ app.use("/auth", authRouter);
 const jwtAuth = passport.authenticate("jwt", { session: false });
 
 // A protected endpoint which needs a valid JWT to access it
-app.get("/dashboard", jwtAuth, (req, res) => {
+app.get("/api/protected", jwtAuth, (req, res) => {
   return res.json({
     data: "rosebud"
   });
